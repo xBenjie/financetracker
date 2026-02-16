@@ -42,6 +42,22 @@ ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE budgets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE goals ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS "Users can view their own transactions" ON transactions;
+DROP POLICY IF EXISTS "Users can insert their own transactions" ON transactions;
+DROP POLICY IF EXISTS "Users can update their own transactions" ON transactions;
+DROP POLICY IF EXISTS "Users can delete their own transactions" ON transactions;
+
+DROP POLICY IF EXISTS "Users can view their own budgets" ON budgets;
+DROP POLICY IF EXISTS "Users can insert their own budgets" ON budgets;
+DROP POLICY IF EXISTS "Users can update their own budgets" ON budgets;
+DROP POLICY IF EXISTS "Users can delete their own budgets" ON budgets;
+
+DROP POLICY IF EXISTS "Users can view their own goals" ON goals;
+DROP POLICY IF EXISTS "Users can insert their own goals" ON goals;
+DROP POLICY IF EXISTS "Users can update their own goals" ON goals;
+DROP POLICY IF EXISTS "Users can delete their own goals" ON goals;
+
 -- Create policies for transactions
 CREATE POLICY "Users can view their own transactions"
   ON transactions FOR SELECT
