@@ -61,6 +61,7 @@ export class AuthComponent implements OnInit {
     const user = users.find(u => u.email === this.loginEmail && u.password === this.loginPassword);
 
     if (user) {
+      this.cleanupOldData();
       localStorage.setItem('currentUser', JSON.stringify({
         id: user.id,
         name: user.name,
@@ -117,6 +118,8 @@ export class AuthComponent implements OnInit {
     localStorage.setItem(userBudgetsKey, JSON.stringify([]));
     localStorage.setItem(userGoalsKey, JSON.stringify([]));
 
+    this.cleanupOldData();
+    
     localStorage.setItem('currentUser', JSON.stringify({
       id: newUser.id,
       name: newUser.name,
@@ -129,5 +132,12 @@ export class AuthComponent implements OnInit {
   private getUsers(): any[] {
     const stored = localStorage.getItem('users');
     return stored ? JSON.parse(stored) : [];
+  }
+
+  private cleanupOldData(): void {
+    // Remove old non-user-specific keys from previous implementation
+    localStorage.removeItem('transactions');
+    localStorage.removeItem('budgets');
+    localStorage.removeItem('goals');
   }
 }
