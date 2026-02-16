@@ -129,13 +129,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
     // Get current user
     const currentUserStr = localStorage.getItem('currentUser');
     if (!currentUserStr) return;
-    
+
     const currentUser = JSON.parse(currentUserStr);
     const userTransactionsKey = `transactions_${currentUser.id}`;
-    
+
     const stored = localStorage.getItem(userTransactionsKey);
     let transactions: Transaction[] = [];
-    
+
     if (stored) {
       transactions = JSON.parse(stored).map((t: any) => ({
         ...t,
@@ -148,7 +148,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   private updateDashboardWithTransactions(transactions: Transaction[]): void {
     // Get recent transactions (last 5)
-    const sortedTransactions = [...transactions].sort((a, b) => 
+    const sortedTransactions = [...transactions].sort((a, b) =>
       new Date(b.date).getTime() - new Date(a.date).getTime()
     );
     this.recentTransactions = sortedTransactions.slice(0, 5).map(t => ({
@@ -162,11 +162,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.totalIncome = transactions
       .filter(t => t.type === 'income')
       .reduce((sum, t) => sum + t.amount, 0);
-    
+
     this.totalExpenses = transactions
       .filter(t => t.type === 'expense')
       .reduce((sum, t) => sum + t.amount, 0);
-    
+
     this.netBalance = this.totalIncome - this.totalExpenses;
     this.transactionsCount = transactions.length;
 
@@ -187,7 +187,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       const transactionDate = new Date(t.date);
       transactionDate.setHours(0, 0, 0, 0);
       const daysDiff = Math.floor((today.getTime() - transactionDate.getTime()) / (1000 * 60 * 60 * 24));
-      
+
       if (daysDiff >= 0 && daysDiff < 7) {
         const index = 6 - daysDiff;
         if (t.type === 'income') {
@@ -201,7 +201,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.dailyChartData.labels = last7Days;
     this.dailyChartData.datasets[0].data = incomeData;
     this.dailyChartData.datasets[1].data = expenseData;
-    
+
     this.dailyChart?.update();
   }
 
@@ -218,9 +218,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
       const transactionDate = new Date(t.date);
       const transactionMonth = transactionDate.getMonth();
       const transactionYear = transactionDate.getFullYear();
-      
+
       const monthsDiff = (currentYear - transactionYear) * 12 + (currentMonth - transactionMonth);
-      
+
       if (monthsDiff >= 0 && monthsDiff < 3) {
         const index = 2 - monthsDiff;
         if (t.type === 'income') {
@@ -234,7 +234,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.monthlyChartData.labels = last3Months;
     this.monthlyChartData.datasets[0].data = incomeData;
     this.monthlyChartData.datasets[1].data = expenseData;
-    
+
     this.monthlyChart?.update();
   }
 

@@ -12,15 +12,15 @@ interface Budget {
 }
 
 @Component({
-    selector: 'app-budgets',
-    standalone: true,
-    imports: [CommonModule, FormsModule],
-    templateUrl: './budgets.component.html',
-    styleUrl: './budgets.component.scss'
+  selector: 'app-budgets',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  templateUrl: './budgets.component.html',
+  styleUrl: './budgets.component.scss'
 })
 export class BudgetsComponent implements OnInit {
   budgets: Budget[] = [];
-  
+
   // Form fields
   showForm = false;
   showDeleteModal = false;
@@ -29,7 +29,7 @@ export class BudgetsComponent implements OnInit {
   category = '';
   limit: number | null = null;
   period: 'monthly' | 'weekly' = 'monthly';
-  
+
   availableCategories = [
     'Food & Dining',
     'Transportation',
@@ -42,7 +42,7 @@ export class BudgetsComponent implements OnInit {
     'Fitness',
     'Personal Care'
   ];
-  
+
   budgetColors = [
     '#6366f1',
     '#f87171',
@@ -53,31 +53,38 @@ export class BudgetsComponent implements OnInit {
     '#60a5fa',
     '#fb923c'
   ];
-  
+
   ngOnInit(): void {
     this.loadBudgets();
   }
-  
+
   loadBudgets(): void {
-    const stored = localStorage.getItem('budgets');
+    // Get current user
+    const currentUserStr = localStorage.getItem('currentUser');
+    if (!currentUserStr) return;
+
+    const currentUser = JSON.parse(currentUserStr);
+    const userBudgetsKey = `budgets_${currentUser.id}`;
+
+    const stored = localStorage.getItem(userBudgetsKey);
     if (stored) {
       this.budgets = JSON.parse(stored);
     } else {
-      // Sample data
-      this.budgets = [
-        { id: 1, category: 'Food & Dining', limit: 8000, spent: 4500, period: 'monthly', color: '#3b82f6' },
-        { id: 2, category: 'Transportation', limit: 3000, spent: 2100, period: 'monthly', color: '#ef4444' },
-        { id: 3, category: 'Entertainment', limit: 2000, spent: 1800, period: 'monthly', color: '#10b981' },
-        { id: 4, category: 'Bills & Utilities', limit: 5000, spent: 4200, period: 'monthly', color: '#f59e0b' },
-      ];
+      // Initialize with empty array for new users
+      this.budgets = [];
       this.saveBudgets();
     }
   }
-  
+
   saveBudgets(): void {
-    localStorage.setItem('budgets', JSON.stringify(this.budgets));
+    const currentUserStr = localStorage.getItem('currentUser');
+    if (!currentUserStr) return;
+
+    const currentUser = JSON.parse(currentUserStr);
+    const userBudgetsKey = `budgets_${currentUser.id}`;
+    localStorage.setItem(userBudgetsKey, JSON.stringify(this.budgets));
   }
-  
+
   openForm(budget?: Budget): void {
     if (budget) {
       this.editingId = budget.id;
@@ -89,24 +96,24 @@ export class BudgetsComponent implements OnInit {
     }
     this.showForm = true;
   }
-  
+
   closeForm(): void {
     this.showForm = false;
     this.resetForm();
   }
-  
+
   resetForm(): void {
     this.editingId = null;
     this.category = '';
     this.limit = null;
     this.period = 'monthly';
   }
-  
+
   saveBudget(): void {
     if (!this.category || !this.limit) {
       return;
     }
-    
+
     if (this.editingId) {
       const index = this.budgets.findIndex(b => b.id === this.editingId);
       if (index !== -1) {
@@ -128,21 +135,21 @@ export class BudgetsComponent implements OnInit {
       };
       this.budgets.push(newBudget);
     }
-    
+
     this.saveBudgets();
     this.closeForm();
   }
-  
+
   openDeleteModal(budget: Budget): void {
     this.deletingBudget = budget;
     this.showDeleteModal = true;
   }
-  
+
   closeDeleteModal(): void {
     this.showDeleteModal = false;
     this.deletingBudget = null;
   }
-  
+
   confirmDelete(): void {
     if (this.deletingBudget) {
       this.budgets = this.budgets.filter(b => b.id !== this.deletingBudget!.id);
@@ -150,37 +157,37 @@ export class BudgetsComponent implements OnInit {
       this.closeDeleteModal();
     }
   }
-  
+
   getPercentage(budget: Budget): number {
     return Math.min((budget.spent / budget.limit) * 100, 100);
   }
-  
+
   getStatusClass(budget: Budget): string {
     const percentage = this.getPercentage(budget);
     if (percentage >= 100) return 'over-budget';
     if (percentage >= 80) return 'warning';
     return 'good';
   }
-  
+
   getRemainingAmount(budget: Budget): number {
     return Math.max(budget.limit - budget.spent, 0);
   }
-  
+
   get totalBudgetLimit(): number {
     return this.budgets.reduce((sum, b) => sum + b.limit, 0);
   }
-  
+
   get totalSpent(): number {
     return this.budgets.reduce((sum, b) => sum + b.spent, 0);
   }
-  
+
   get overallPercentage(): number {
     return this.totalBudgetLimit > 0 ? (this.totalSpent / this.totalBudgetLimit) * 100 : 0;
   }
-  
+
   getAvailableCategories(): string[] {
     const usedCategories = this.budgets.map(b => b.category);
-    return this.availableCategories.filter(c => 
+    return this.availableCategories.filter(c =>
       this.editingId ? true : !usedCategories.includes(c)
     );
   }

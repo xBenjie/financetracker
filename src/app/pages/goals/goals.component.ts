@@ -67,52 +67,33 @@ export class GoalsComponent implements OnInit {
   }
   
   loadGoals(): void {
-    const stored = localStorage.getItem('goals');
+    // Get current user
+    const currentUserStr = localStorage.getItem('currentUser');
+    if (!currentUserStr) return;
+    
+    const currentUser = JSON.parse(currentUserStr);
+    const userGoalsKey = `goals_${currentUser.id}`;
+    
+    const stored = localStorage.getItem(userGoalsKey);
     if (stored) {
       this.goals = JSON.parse(stored).map((g: any) => ({
         ...g,
         deadline: new Date(g.deadline)
       }));
     } else {
-      // Sample data
-      this.goals = [
-        {
-          id: 1,
-          title: 'Emergency Fund',
-          targetAmount: 100000,
-          currentAmount: 45000,
-          deadline: new Date('2026-12-31'),
-          category: 'Emergency Fund',
-          color: '#3b82f6',
-          completed: false
-        },
-        {
-          id: 2,
-          title: 'Japan Vacation',
-          targetAmount: 80000,
-          currentAmount: 32000,
-          deadline: new Date('2026-10-01'),
-          category: 'Vacation',
-          color: '#10b981',
-          completed: false
-        },
-        {
-          id: 3,
-          title: 'New Laptop',
-          targetAmount: 60000,
-          currentAmount: 60000,
-          deadline: new Date('2026-06-01'),
-          category: 'Other',
-          color: '#f59e0b',
-          completed: true
-        }
-      ];
+      // Initialize with empty array for new users
+      this.goals = [];
       this.saveGoals();
     }
   }
   
   saveGoals(): void {
-    localStorage.setItem('goals', JSON.stringify(this.goals));
+    const currentUserStr = localStorage.getItem('currentUser');
+    if (!currentUserStr) return;
+    
+    const currentUser = JSON.parse(currentUserStr);
+    const userGoalsKey = `goals_${currentUser.id}`;
+    localStorage.setItem(userGoalsKey, JSON.stringify(this.goals));
   }
   
   openForm(goal?: Goal): void {

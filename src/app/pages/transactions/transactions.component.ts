@@ -21,7 +21,7 @@ interface Transaction {
 export class TransactionsComponent implements OnInit {
   transactions: Transaction[] = [];
   filteredTransactions: Transaction[] = [];
-  
+
   // Form fields
   showForm = false;
   showDeleteModal = false;
@@ -32,29 +32,29 @@ export class TransactionsComponent implements OnInit {
   type: 'income' | 'expense' = 'expense';
   category = '';
   date = new Date().toISOString().split('T')[0];
-  
+
   // Filter fields
   filterType: 'all' | 'income' | 'expense' = 'all';
   searchText = '';
-  
+
   categories = {
     income: ['Salary', 'Freelance', 'Investment', 'Gift', 'Other Income'],
     expense: ['Food', 'Transportation', 'Entertainment', 'Bills', 'Shopping', 'Healthcare', 'Other Expense']
   };
-  
+
   ngOnInit(): void {
     this.loadTransactions();
     this.applyFilters();
   }
-  
+
   loadTransactions(): void {
     // Get current user
     const currentUserStr = localStorage.getItem('currentUser');
     if (!currentUserStr) return;
-    
+
     const currentUser = JSON.parse(currentUserStr);
     const userTransactionsKey = `transactions_${currentUser.id}`;
-    
+
     // Load from localStorage
     const stored = localStorage.getItem(userTransactionsKey);
     if (stored) {
@@ -68,16 +68,16 @@ export class TransactionsComponent implements OnInit {
       this.saveTransactions();
     }
   }
-  
+
   saveTransactions(): void {
     const currentUserStr = localStorage.getItem('currentUser');
     if (!currentUserStr) return;
-    
+
     const currentUser = JSON.parse(currentUserStr);
     const userTransactionsKey = `transactions_${currentUser.id}`;
     localStorage.setItem(userTransactionsKey, JSON.stringify(this.transactions));
   }
-  
+
   openForm(transaction?: Transaction): void {
     if (transaction) {
       this.editingId = transaction.id;
@@ -91,12 +91,12 @@ export class TransactionsComponent implements OnInit {
     }
     this.showForm = true;
   }
-  
+
   closeForm(): void {
     this.showForm = false;
     this.resetForm();
   }
-  
+
   resetForm(): void {
     this.editingId = null;
     this.description = '';
@@ -105,12 +105,12 @@ export class TransactionsComponent implements OnInit {
     this.category = '';
     this.date = new Date().toISOString().split('T')[0];
   }
-  
+
   saveTransaction(): void {
     if (!this.description || !this.amount || !this.category) {
       return;
     }
-    
+
     if (this.editingId) {
       // Edit existing
       const index = this.transactions.findIndex(t => t.id === this.editingId);
@@ -136,22 +136,22 @@ export class TransactionsComponent implements OnInit {
       };
       this.transactions.unshift(newTransaction);
     }
-    
+
     this.saveTransactions();
     this.applyFilters();
     this.closeForm();
   }
-  
+
   openDeleteModal(transaction: Transaction): void {
     this.deletingTransaction = transaction;
     this.showDeleteModal = true;
   }
-  
+
   closeDeleteModal(): void {
     this.showDeleteModal = false;
     this.deletingTransaction = null;
   }
-  
+
   confirmDelete(): void {
     if (this.deletingTransaction) {
       this.transactions = this.transactions.filter(t => t.id !== this.deletingTransaction!.id);
@@ -160,46 +160,46 @@ export class TransactionsComponent implements OnInit {
       this.closeDeleteModal();
     }
   }
-  
+
   applyFilters(): void {
     let result = [...this.transactions];
-    
+
     // Filter by type
     if (this.filterType !== 'all') {
       result = result.filter(t => t.type === this.filterType);
     }
-    
+
     // Filter by search text
     if (this.searchText) {
       const search = this.searchText.toLowerCase();
-      result = result.filter(t => 
+      result = result.filter(t =>
         t.description.toLowerCase().includes(search) ||
         t.category.toLowerCase().includes(search)
       );
     }
-    
+
     // Sort by date (newest first)
     result.sort((a, b) => b.date.getTime() - a.date.getTime());
-    
+
     this.filteredTransactions = result;
   }
-  
+
   get totalIncome(): number {
     return this.transactions
       .filter(t => t.type === 'income')
       .reduce((sum, t) => sum + t.amount, 0);
   }
-  
+
   get totalExpenses(): number {
     return this.transactions
       .filter(t => t.type === 'expense')
       .reduce((sum, t) => sum + t.amount, 0);
   }
-  
+
   get netBalance(): number {
     return this.totalIncome - this.totalExpenses;
   }
-  
+
   getCategoryOptions(): string[] {
     return this.categories[this.type];
   }

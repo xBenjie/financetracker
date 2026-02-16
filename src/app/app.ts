@@ -16,11 +16,11 @@ export class App implements OnInit {
   sidenavCollapsed = false;
   isAuthenticated = false;
 
-  constructor(private router: Router) {}
+  constructor(private router: Router) { }
 
   ngOnInit() {
     this.checkAuthStatus();
-    
+
     // Listen to navigation changes to update auth status
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)

@@ -13,19 +13,19 @@ import { Router } from '@angular/router';
 export class AuthComponent implements OnInit {
   isLoginMode = true;
   errorMessage = '';
-  
+
   // Login fields
   loginEmail = '';
   loginPassword = '';
-  
+
   // Signup fields
   signupName = '';
   signupEmail = '';
   signupPassword = '';
   signupConfirmPassword = '';
-  
-  constructor(private router: Router) {}
-  
+
+  constructor(private router: Router) { }
+
   ngOnInit(): void {
     // Check if already logged in
     const currentUser = localStorage.getItem('currentUser');
@@ -33,12 +33,12 @@ export class AuthComponent implements OnInit {
       this.router.navigate(['/dashboard']);
     }
   }
-  
+
   toggleMode(): void {
     this.isLoginMode = !this.isLoginMode;
     this.clearForms();
   }
-  
+
   clearForms(): void {
     this.loginEmail = '';
     this.loginPassword = '';
@@ -48,18 +48,18 @@ export class AuthComponent implements OnInit {
     this.signupConfirmPassword = '';
     this.errorMessage = '';
   }
-  
+
   onLogin(): void {
     this.errorMessage = '';
-    
+
     if (!this.loginEmail || !this.loginPassword) {
       this.errorMessage = 'Please fill in all fields';
       return;
     }
-    
+
     const users = this.getUsers();
     const user = users.find(u => u.email === this.loginEmail && u.password === this.loginPassword);
-    
+
     if (user) {
       localStorage.setItem('currentUser', JSON.stringify({
         id: user.id,
@@ -71,32 +71,32 @@ export class AuthComponent implements OnInit {
       this.errorMessage = 'Invalid email or password';
     }
   }
-  
+
   onSignup(): void {
     this.errorMessage = '';
-    
+
     if (!this.signupName || !this.signupEmail || !this.signupPassword || !this.signupConfirmPassword) {
       this.errorMessage = 'Please fill in all fields';
       return;
     }
-    
+
     if (this.signupPassword !== this.signupConfirmPassword) {
       this.errorMessage = 'Passwords do not match';
       return;
     }
-    
+
     if (this.signupPassword.length < 6) {
       this.errorMessage = 'Password must be at least 6 characters';
       return;
     }
-    
+
     const users = this.getUsers();
-    
+
     if (users.find(u => u.email === this.signupEmail)) {
       this.errorMessage = 'Email already exists';
       return;
     }
-    
+
     const newUser = {
       id: Date.now(),
       name: this.signupName,
@@ -104,23 +104,28 @@ export class AuthComponent implements OnInit {
       password: this.signupPassword,
       createdAt: new Date().toISOString()
     };
-    
+
     users.push(newUser);
     localStorage.setItem('users', JSON.stringify(users));
-    
-    // Initialize empty transactions for new user
+
+    // Initialize empty data for new user
     const userTransactionsKey = `transactions_${newUser.id}`;
-    localStorage.setItem(userTransactionsKey, JSON.stringify([]));
+    const userBudgetsKey = `budgets_${newUser.id}`;
+    const userGoalsKey = `goals_${newUser.id}`;
     
+    localStorage.setItem(userTransactionsKey, JSON.stringify([]));
+    localStorage.setItem(userBudgetsKey, JSON.stringify([]));
+    localStorage.setItem(userGoalsKey, JSON.stringify([]));
+
     localStorage.setItem('currentUser', JSON.stringify({
       id: newUser.id,
       name: newUser.name,
       email: newUser.email
     }));
-    
+
     this.router.navigate(['/dashboard']);
   }
-  
+
   private getUsers(): any[] {
     const stored = localStorage.getItem('users');
     return stored ? JSON.parse(stored) : [];
