@@ -4,6 +4,7 @@ import { interval, Subscription } from 'rxjs';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData, ChartOptions, ChartType } from 'chart.js';
 import { Chart, registerables } from 'chart.js';
+import { SupabaseService } from '../../services/supabase.service';
 
 Chart.register(...registerables);
 
@@ -114,7 +115,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   };
 
   private realtimeSub?: Subscription;
-  private readonly realtimeIntervalMs = 2000;
+  private readonly realtimeIntervalMs = 5000;
+
+  constructor(private supabase: SupabaseService) { }
 
   ngOnInit(): void {
     this.loadRealData();
@@ -125,24 +128,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.realtimeSub?.unsubscribe();
   }
 
-  private loadRealData(): void {
-    // Get current user
-    const currentUserStr = localStorage.getItem('currentUser');
-    if (!currentUserStr) return;
-
-    const currentUser = JSON.parse(currentUserStr);
-    const userTransactionsKey = `transactions_${currentUser.id}`;
-
-    const stored = localStorage.getItem(userTransactionsKey);
-    let transactions: Transaction[] = [];
-
-    if (stored) {
-      transactions = JSON.parse(stored).map((t: any) => ({
-        ...t,
-        date: new Date(t.date)
-      }));
+  private async loadRealData(): Promise<void> {
+    const { data, error } = await this.supabase.getTransactions();
+    if (error) {
+      console.error('Error loading transactions:', error);
+      return;
     }
-
+    const transactions: Transaction[] = (data || []).map((t: any) => ({
+      ...t,
+      date: new Date(t.date)
+    }));
     this.updateDashboardWithTransactions(transactions);
   }
 

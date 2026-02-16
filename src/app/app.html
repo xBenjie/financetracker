@@ -1,7 +1,7 @@
 <div class="app-container">
-  <app-sidenav *ngIf="isAuthenticated" (toggleChange)="onSidenavToggle($event)"></app-sidenav>
-  <main class="main-content" [style.margin-left.px]="isAuthenticated ? (sidenavCollapsed ? 70 : 250) : 0">
-    <app-header *ngIf="isAuthenticated"></app-header>
+  <app-sidenav *ngIf="isAuthenticated | async" (toggleChange)="onSidenavToggle($event)"></app-sidenav>
+  <main class="main-content" [style.margin-left.px]="(isAuthenticated | async) ? (sidenavCollapsed ? 70 : 250) : 0">
+    <app-header *ngIf="isAuthenticated | async"></app-header>
     <div class="page-content">
       <router-outlet />
     </div>

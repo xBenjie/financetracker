@@ -7,42 +7,25 @@ import { AuthComponent } from './pages/auth/auth.component';
 import { ProfileComponent } from './pages/profile/profile.component';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { SupabaseService } from './services/supabase.service';
 
 const authGuard = () => {
   const router = inject(Router);
+  const supabase = inject(SupabaseService);
 
-  // Check if user is logged in
-  const currentUser = localStorage.getItem('currentUser');
-  if (!currentUser) {
+  if (!supabase.currentUserValue) {
     router.navigate(['/auth']);
     return false;
   }
 
-  // Validate that the current user exists in users array
-  const usersData = localStorage.getItem('users');
-  const users = usersData ? JSON.parse(usersData) : [];
-
-  try {
-    const user = JSON.parse(currentUser);
-    const userExists = users.some((u: any) => u.email === user.email);
-    if (userExists) {
-      return true;
-    }
-  } catch (e) {
-    // Invalid currentUser data
-  }
-
-  // If validation fails, clear invalid data and redirect
-  localStorage.removeItem('currentUser');
-  router.navigate(['/auth']);
-  return false;
+  return true;
 };
 
 const homeGuard = () => {
   const router = inject(Router);
-  const currentUser = localStorage.getItem('currentUser');
+  const supabase = inject(SupabaseService);
 
-  if (currentUser) {
+  if (supabase.currentUserValue) {
     router.navigate(['/dashboard']);
   } else {
     router.navigate(['/auth']);

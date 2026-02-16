@@ -1,20 +1,20 @@
 <header class="header">
   <div class="greeting-section" style="text-align: center; flex: 1;">
-    <h1 class="greeting-text">{{ greeting }}, {{ userName }}!</h1>
+    <h1 class="greeting-text">{{ greeting }}, {{ currentUserName | async }}!</h1>
     <p class="date-text">{{ currentDate | date: 'EEEE, MMMM d, y' }}</p>
   </div>
   <div class="profile-section">
     <button class="profile-button" (click)="toggleProfileMenu()">
-      <div class="avatar">{{ userName.charAt(0).toUpperCase() }}</div>
-      <span class="profile-name">{{ userName }}</span>
+      <div class="avatar">{{ ((currentUserName | async) || 'U').charAt(0).toUpperCase() }}</div>
+      <span class="profile-name">{{ currentUserName | async }}</span>
       <span class="dropdown-icon">▼</span>
     </button>
     <div class="profile-menu" *ngIf="showProfileMenu" (click)="closeProfileMenu()">
       <div class="profile-menu-content" (click)="$event.stopPropagation()">
         <div class="profile-menu-header">
-          <div class="avatar-large">{{ userName.charAt(0).toUpperCase() }}</div>
+          <div class="avatar-large">{{ ((currentUserName | async) || 'U').charAt(0).toUpperCase() }}</div>
           <div>
-            <p class="profile-menu-name">{{ userName }}</p>
+            <p class="profile-menu-name">{{ currentUserName | async }}</p>
             <p class="profile-menu-email">{{ userEmail }}</p>
           </div>
         </div>

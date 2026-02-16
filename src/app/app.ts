@@ -3,7 +3,9 @@ import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { SidenavComponent } from './components/sidenav/sidenav.component';
 import { HeaderComponent } from './components/header/header.component';
 import { CommonModule } from '@angular/common';
-import { filter } from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
+import { SupabaseService } from './services/supabase.service';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -14,24 +16,19 @@ import { filter } from 'rxjs/operators';
 export class App implements OnInit {
   protected readonly title = signal('finance-tracker');
   sidenavCollapsed = false;
-  isAuthenticated = false;
+  isAuthenticated: Observable<boolean>;
 
-  constructor(private router: Router) { }
-
-  ngOnInit() {
-    this.checkAuthStatus();
-
-    // Listen to navigation changes to update auth status
-    this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
-    ).subscribe(() => {
-      this.checkAuthStatus();
-    });
+  constructor(
+    private router: Router,
+    private supabase: SupabaseService
+  ) {
+    this.isAuthenticated = this.supabase.currentUser.pipe(
+      map(user => !!user)
+    );
   }
 
-  private checkAuthStatus() {
-    const currentUser = localStorage.getItem('currentUser');
-    this.isAuthenticated = !!currentUser;
+  ngOnInit() {
+    // Navigation events are handled by auth guard
   }
 
   onSidenavToggle(collapsed: boolean) {

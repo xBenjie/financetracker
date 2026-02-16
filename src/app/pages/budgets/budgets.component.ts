@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { SupabaseService } from '../../services/supabase.service';
 
 interface Budget {
   id: number;
   category: string;
-  limit: number;
+  limit_amount: number;
   spent: number;
   period: 'monthly' | 'weekly';
   color: string;
@@ -54,42 +55,26 @@ export class BudgetsComponent implements OnInit {
     '#fb923c'
   ];
 
+  constructor(private supabase: SupabaseService) { }
+
   ngOnInit(): void {
     this.loadBudgets();
   }
 
-  loadBudgets(): void {
-    // Get current user
-    const currentUserStr = localStorage.getItem('currentUser');
-    if (!currentUserStr) return;
-
-    const currentUser = JSON.parse(currentUserStr);
-    const userBudgetsKey = `budgets_${currentUser.id}`;
-
-    const stored = localStorage.getItem(userBudgetsKey);
-    if (stored) {
-      this.budgets = JSON.parse(stored);
-    } else {
-      // Initialize with empty array for new users
-      this.budgets = [];
-      this.saveBudgets();
+  async loadBudgets(): Promise<void> {
+    const { data, error } = await this.supabase.getBudgets();
+    if (error) {
+      console.error('Error loading budgets:', error);
+      return;
     }
-  }
-
-  saveBudgets(): void {
-    const currentUserStr = localStorage.getItem('currentUser');
-    if (!currentUserStr) return;
-
-    const currentUser = JSON.parse(currentUserStr);
-    const userBudgetsKey = `budgets_${currentUser.id}`;
-    localStorage.setItem(userBudgetsKey, JSON.stringify(this.budgets));
+    this.budgets = data || [];
   }
 
   openForm(budget?: Budget): void {
     if (budget) {
       this.editingId = budget.id;
       this.category = budget.category;
-      this.limit = budget.limit;
+      this.limit = budget.limit_amount;
       this.period = budget.period;
     } else {
       this.resetForm();
@@ -109,34 +94,38 @@ export class BudgetsComponent implements OnInit {
     this.period = 'monthly';
   }
 
-  saveBudget(): void {
+  async saveBudget(): Promise<void> {
     if (!this.category || !this.limit) {
       return;
     }
 
     if (this.editingId) {
-      const index = this.budgets.findIndex(b => b.id === this.editingId);
-      if (index !== -1) {
-        this.budgets[index] = {
-          ...this.budgets[index],
-          category: this.category,
-          limit: this.limit,
-          period: this.period
-        };
+      const budgetData = {
+        category: this.category,
+        limit_amount: this.limit,
+        period: this.period
+      };
+      const { error } = await this.supabase.updateBudget(this.editingId, budgetData);
+      if (error) {
+        console.error('Error updating budget:', error);
+        return;
       }
     } else {
-      const newBudget: Budget = {
-        id: Date.now(),
+      const newBudget = {
         category: this.category,
-        limit: this.limit,
+        limit_amount: this.limit,
         spent: 0,
         period: this.period,
         color: this.budgetColors[this.budgets.length % this.budgetColors.length]
       };
-      this.budgets.push(newBudget);
+      const { error } = await this.supabase.createBudget(newBudget);
+      if (error) {
+        console.error('Error creating budget:', error);
+        return;
+      }
     }
 
-    this.saveBudgets();
+    await this.loadBudgets();
     this.closeForm();
   }
 
@@ -150,16 +139,20 @@ export class BudgetsComponent implements OnInit {
     this.deletingBudget = null;
   }
 
-  confirmDelete(): void {
+  async confirmDelete(): Promise<void> {
     if (this.deletingBudget) {
-      this.budgets = this.budgets.filter(b => b.id !== this.deletingBudget!.id);
-      this.saveBudgets();
+      const { error } = await this.supabase.deleteBudget(this.deletingBudget.id);
+      if (error) {
+        console.error('Error deleting budget:', error);
+        return;
+      }
+      await this.loadBudgets();
       this.closeDeleteModal();
     }
   }
 
   getPercentage(budget: Budget): number {
-    return Math.min((budget.spent / budget.limit) * 100, 100);
+    return Math.min((budget.spent / budget.limit_amount) * 100, 100);
   }
 
   getStatusClass(budget: Budget): string {
@@ -170,11 +163,11 @@ export class BudgetsComponent implements OnInit {
   }
 
   getRemainingAmount(budget: Budget): number {
-    return Math.max(budget.limit - budget.spent, 0);
+    return Math.max(budget.limit_amount - budget.spent, 0);
   }
 
   get totalBudgetLimit(): number {
-    return this.budgets.reduce((sum, b) => sum + b.limit, 0);
+    return this.budgets.reduce((sum, b) => sum + b.limit_amount, 0);
   }
 
   get totalSpent(): number {

@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { SupabaseService } from '../../services/supabase.service';
 
 @Component({
   selector: 'app-auth',
@@ -24,12 +25,11 @@ export class AuthComponent implements OnInit {
   signupPassword = '';
   signupConfirmPassword = '';
 
-  constructor(private router: Router) { }
+  constructor(private router: Router, private supabase: SupabaseService) { }
 
   ngOnInit(): void {
     // Check if already logged in
-    const currentUser = localStorage.getItem('currentUser');
-    if (currentUser) {
+    if (this.supabase.currentUserValue) {
       this.router.navigate(['/dashboard']);
     }
   }
@@ -49,7 +49,7 @@ export class AuthComponent implements OnInit {
     this.errorMessage = '';
   }
 
-  onLogin(): void {
+  async onLogin(): Promise<void> {
     this.errorMessage = '';
 
     if (!this.loginEmail || !this.loginPassword) {
@@ -57,23 +57,17 @@ export class AuthComponent implements OnInit {
       return;
     }
 
-    const users = this.getUsers();
-    const user = users.find(u => u.email === this.loginEmail && u.password === this.loginPassword);
+    const { data, error } = await this.supabase.signIn(this.loginEmail, this.loginPassword);
 
-    if (user) {
-      this.cleanupOldData();
-      localStorage.setItem('currentUser', JSON.stringify({
-        id: user.id,
-        name: user.name,
-        email: user.email
-      }));
+    if (error) {
+      this.errorMessage = error.message || 'Invalid email or password';
+    } else if (data.user) {
+      this.cleanupOldLocalStorage();
       this.router.navigate(['/dashboard']);
-    } else {
-      this.errorMessage = 'Invalid email or password';
     }
   }
 
-  onSignup(): void {
+  async onSignup(): Promise<void> {
     this.errorMessage = '';
 
     if (!this.signupName || !this.signupEmail || !this.signupPassword || !this.signupConfirmPassword) {
@@ -91,53 +85,30 @@ export class AuthComponent implements OnInit {
       return;
     }
 
-    const users = this.getUsers();
+    const { data, error } = await this.supabase.signUp(this.signupEmail, this.signupPassword);
 
-    if (users.find(u => u.email === this.signupEmail)) {
-      this.errorMessage = 'Email already exists';
-      return;
+    if (error) {
+      this.errorMessage = error.message || 'Failed to create account';
+    } else if (data.user) {
+      this.cleanupOldLocalStorage();
+      this.router.navigate(['/dashboard']);
     }
-
-    const newUser = {
-      id: Date.now(),
-      name: this.signupName,
-      email: this.signupEmail,
-      password: this.signupPassword,
-      createdAt: new Date().toISOString()
-    };
-
-    users.push(newUser);
-    localStorage.setItem('users', JSON.stringify(users));
-
-    // Initialize empty data for new user
-    const userTransactionsKey = `transactions_${newUser.id}`;
-    const userBudgetsKey = `budgets_${newUser.id}`;
-    const userGoalsKey = `goals_${newUser.id}`;
-
-    localStorage.setItem(userTransactionsKey, JSON.stringify([]));
-    localStorage.setItem(userBudgetsKey, JSON.stringify([]));
-    localStorage.setItem(userGoalsKey, JSON.stringify([]));
-
-    this.cleanupOldData();
-
-    localStorage.setItem('currentUser', JSON.stringify({
-      id: newUser.id,
-      name: newUser.name,
-      email: newUser.email
-    }));
-
-    this.router.navigate(['/dashboard']);
   }
 
-  private getUsers(): any[] {
-    const stored = localStorage.getItem('users');
-    return stored ? JSON.parse(stored) : [];
-  }
-
-  private cleanupOldData(): void {
-    // Remove old non-user-specific keys from previous implementation
+  private cleanupOldLocalStorage(): void {
+    // Remove old localStorage keys from previous implementation
+    localStorage.removeItem('users');
+    localStorage.removeItem('currentUser');
     localStorage.removeItem('transactions');
     localStorage.removeItem('budgets');
     localStorage.removeItem('goals');
+
+    // Remove all user-specific keys
+    const keys = Object.keys(localStorage);
+    keys.forEach(key => {
+      if (key.startsWith('transactions_') || key.startsWith('budgets_') || key.startsWith('goals_')) {
+        localStorage.removeItem(key);
+      }
+    });
   }
 }

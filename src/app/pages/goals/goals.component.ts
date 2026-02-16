@@ -1,12 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { SupabaseService } from '../../services/supabase.service';
 
 interface Goal {
   id: number;
   title: string;
-  targetAmount: number;
-  currentAmount: number;
+  target_amount: number;
+  current_amount: number;
   deadline: Date;
   category: string;
   color: string;
@@ -62,46 +63,30 @@ export class GoalsComponent implements OnInit {
     '#84cc16'
   ];
 
+  constructor(private supabase: SupabaseService) { }
+
   ngOnInit(): void {
     this.loadGoals();
   }
 
-  loadGoals(): void {
-    // Get current user
-    const currentUserStr = localStorage.getItem('currentUser');
-    if (!currentUserStr) return;
-
-    const currentUser = JSON.parse(currentUserStr);
-    const userGoalsKey = `goals_${currentUser.id}`;
-
-    const stored = localStorage.getItem(userGoalsKey);
-    if (stored) {
-      this.goals = JSON.parse(stored).map((g: any) => ({
-        ...g,
-        deadline: new Date(g.deadline)
-      }));
-    } else {
-      // Initialize with empty array for new users
-      this.goals = [];
-      this.saveGoals();
+  async loadGoals(): Promise<void> {
+    const { data, error } = await this.supabase.getGoals();
+    if (error) {
+      console.error('Error loading goals:', error);
+      return;
     }
-  }
-
-  saveGoals(): void {
-    const currentUserStr = localStorage.getItem('currentUser');
-    if (!currentUserStr) return;
-
-    const currentUser = JSON.parse(currentUserStr);
-    const userGoalsKey = `goals_${currentUser.id}`;
-    localStorage.setItem(userGoalsKey, JSON.stringify(this.goals));
+    this.goals = (data || []).map((g: any) => ({
+      ...g,
+      deadline: new Date(g.deadline)
+    }));
   }
 
   openForm(goal?: Goal): void {
     if (goal) {
       this.editingId = goal.id;
       this.title = goal.title;
-      this.targetAmount = goal.targetAmount;
-      this.currentAmount = goal.currentAmount;
+      this.targetAmount = goal.target_amount;
+      this.currentAmount = goal.current_amount;
       this.deadline = goal.deadline.toISOString().split('T')[0];
       this.category = goal.category;
     } else {
@@ -124,38 +109,42 @@ export class GoalsComponent implements OnInit {
     this.category = '';
   }
 
-  saveGoal(): void {
+  async saveGoal(): Promise<void> {
     if (!this.title || !this.targetAmount || !this.deadline || !this.category) {
       return;
     }
 
     if (this.editingId) {
-      const index = this.goals.findIndex(g => g.id === this.editingId);
-      if (index !== -1) {
-        this.goals[index] = {
-          ...this.goals[index],
-          title: this.title,
-          targetAmount: this.targetAmount,
-          currentAmount: this.currentAmount || 0,
-          deadline: new Date(this.deadline),
-          category: this.category
-        };
+      const goalData = {
+        title: this.title,
+        target_amount: this.targetAmount,
+        current_amount: this.currentAmount || 0,
+        deadline: this.deadline,
+        category: this.category
+      };
+      const { error } = await this.supabase.updateGoal(this.editingId, goalData);
+      if (error) {
+        console.error('Error updating goal:', error);
+        return;
       }
     } else {
-      const newGoal: Goal = {
-        id: Date.now(),
+      const newGoal = {
         title: this.title,
-        targetAmount: this.targetAmount,
-        currentAmount: this.currentAmount || 0,
-        deadline: new Date(this.deadline),
+        target_amount: this.targetAmount,
+        current_amount: this.currentAmount || 0,
+        deadline: this.deadline,
         category: this.category,
         color: this.goalColors[this.goals.length % this.goalColors.length],
         completed: false
       };
-      this.goals.push(newGoal);
+      const { error } = await this.supabase.createGoal(newGoal);
+      if (error) {
+        console.error('Error creating goal:', error);
+        return;
+      }
     }
 
-    this.saveGoals();
+    await this.loadGoals();
     this.closeForm();
   }
 
@@ -169,10 +158,14 @@ export class GoalsComponent implements OnInit {
     this.deletingGoal = null;
   }
 
-  confirmDelete(): void {
+  async confirmDelete(): Promise<void> {
     if (this.deletingGoal) {
-      this.goals = this.goals.filter(g => g.id !== this.deletingGoal!.id);
-      this.saveGoals();
+      const { error } = await this.supabase.deleteGoal(this.deletingGoal.id);
+      if (error) {
+        console.error('Error deleting goal:', error);
+        return;
+      }
+      await this.loadGoals();
       this.closeDeleteModal();
     }
   }
@@ -189,29 +182,35 @@ export class GoalsComponent implements OnInit {
     this.contributeAmount = null;
   }
 
-  addContribution(): void {
+  async addContribution(): Promise<void> {
     if (!this.contributingGoal || !this.contributeAmount || this.contributeAmount <= 0) {
       return;
     }
 
     const goal = this.goals.find(g => g.id === this.contributingGoal!.id);
     if (goal) {
-      goal.currentAmount += this.contributeAmount;
-      if (goal.currentAmount >= goal.targetAmount) {
-        goal.completed = true;
+      const newCurrentAmount = goal.current_amount + this.contributeAmount;
+      const goalData = {
+        current_amount: newCurrentAmount,
+        completed: newCurrentAmount >= goal.target_amount
+      };
+      const { error } = await this.supabase.updateGoal(goal.id, goalData);
+      if (error) {
+        console.error('Error updating contribution:', error);
+        return;
       }
-      this.saveGoals();
+      await this.loadGoals();
     }
 
     this.closeContributeModal();
   }
 
   getPercentage(goal: Goal): number {
-    return Math.min((goal.currentAmount / goal.targetAmount) * 100, 100);
+    return Math.min((goal.current_amount / goal.target_amount) * 100, 100);
   }
 
   getRemainingAmount(goal: Goal): number {
-    return Math.max(goal.targetAmount - goal.currentAmount, 0);
+    return Math.max(goal.target_amount - goal.current_amount, 0);
   }
 
   getDaysRemaining(goal: Goal): number {
@@ -242,11 +241,11 @@ export class GoalsComponent implements OnInit {
   }
 
   get totalTargetAmount(): number {
-    return this.activeGoals.reduce((sum, g) => sum + g.targetAmount, 0);
+    return this.activeGoals.reduce((sum, g) => sum + g.target_amount, 0);
   }
 
   get totalCurrentAmount(): number {
-    return this.activeGoals.reduce((sum, g) => sum + g.currentAmount, 0);
+    return this.activeGoals.reduce((sum, g) => sum + g.current_amount, 0);
   }
 
   get totalRemaining(): number {

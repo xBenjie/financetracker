@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { SupabaseService } from '../../services/supabase.service';
 
 interface Transaction {
   id: number;
@@ -42,40 +43,26 @@ export class TransactionsComponent implements OnInit {
     expense: ['Food', 'Transportation', 'Entertainment', 'Bills', 'Shopping', 'Healthcare', 'Other Expense']
   };
 
+  constructor(private supabase: SupabaseService) { }
+
   ngOnInit(): void {
     this.loadTransactions();
-    this.applyFilters();
   }
 
-  loadTransactions(): void {
-    // Get current user
-    const currentUserStr = localStorage.getItem('currentUser');
-    if (!currentUserStr) return;
+  async loadTransactions(): Promise<void> {
+    const { data, error } = await this.supabase.getTransactions();
 
-    const currentUser = JSON.parse(currentUserStr);
-    const userTransactionsKey = `transactions_${currentUser.id}`;
-
-    // Load from localStorage
-    const stored = localStorage.getItem(userTransactionsKey);
-    if (stored) {
-      this.transactions = JSON.parse(stored).map((t: any) => ({
+    if (error) {
+      console.error('Error loading transactions:', error);
+      this.transactions = [];
+    } else {
+      this.transactions = (data || []).map((t: any) => ({
         ...t,
         date: new Date(t.date)
       }));
-    } else {
-      // Initialize with empty array for new users
-      this.transactions = [];
-      this.saveTransactions();
     }
-  }
 
-  saveTransactions(): void {
-    const currentUserStr = localStorage.getItem('currentUser');
-    if (!currentUserStr) return;
-
-    const currentUser = JSON.parse(currentUserStr);
-    const userTransactionsKey = `transactions_${currentUser.id}`;
-    localStorage.setItem(userTransactionsKey, JSON.stringify(this.transactions));
+    this.applyFilters();
   }
 
   openForm(transaction?: Transaction): void {
@@ -106,40 +93,54 @@ export class TransactionsComponent implements OnInit {
     this.date = new Date().toISOString().split('T')[0];
   }
 
-  saveTransaction(): void {
+  async saveTransaction(): Promise<void> {
     if (!this.description || !this.amount || !this.category) {
       return;
     }
 
     if (this.editingId) {
-      // Edit existing
-      const index = this.transactions.findIndex(t => t.id === this.editingId);
-      if (index !== -1) {
-        this.transactions[index] = {
-          id: this.editingId,
-          description: this.description,
-          amount: this.amount,
-          type: this.type,
-          category: this.category,
-          date: new Date(this.date)
-        };
-      }
+      await this.updateTransaction();
     } else {
-      // Add new
-      const newTransaction: Transaction = {
-        id: Date.now(),
-        description: this.description,
-        amount: this.amount,
-        type: this.type,
-        category: this.category,
-        date: new Date(this.date)
-      };
-      this.transactions.unshift(newTransaction);
+      await this.createTransaction();
     }
 
-    this.saveTransactions();
-    this.applyFilters();
     this.closeForm();
+  }
+
+  private async createTransaction(): Promise<void> {
+    const transaction = {
+      description: this.description,
+      amount: this.amount,
+      type: this.type,
+      category: this.category,
+      date: new Date(this.date).toISOString()
+    };
+
+    const { error } = await this.supabase.createTransaction(transaction);
+
+    if (error) {
+      console.error('Error creating transaction:', error);
+    } else {
+      await this.loadTransactions();
+    }
+  }
+
+  private async updateTransaction(): Promise<void> {
+    const transaction = {
+      description: this.description,
+      amount: this.amount,
+      type: this.type,
+      category: this.category,
+      date: new Date(this.date).toISOString()
+    };
+
+    const { error } = await this.supabase.updateTransaction(this.editingId!, transaction);
+
+    if (error) {
+      console.error('Error updating transaction:', error);
+    } else {
+      await this.loadTransactions();
+    }
   }
 
   openDeleteModal(transaction: Transaction): void {
@@ -152,11 +153,16 @@ export class TransactionsComponent implements OnInit {
     this.deletingTransaction = null;
   }
 
-  confirmDelete(): void {
+  async confirmDelete(): Promise<void> {
     if (this.deletingTransaction) {
-      this.transactions = this.transactions.filter(t => t.id !== this.deletingTransaction!.id);
-      this.saveTransactions();
-      this.applyFilters();
+      const { error } = await this.supabase.deleteTransaction(this.deletingTransaction.id);
+
+      if (error) {
+        console.error('Error deleting transaction:', error);
+      } else {
+        await this.loadTransactions();
+      }
+
       this.closeDeleteModal();
     }
   }

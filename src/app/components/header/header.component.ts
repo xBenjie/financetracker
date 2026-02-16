@@ -1,6 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
+import { SupabaseService } from '../../services/supabase.service';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { User } from '@supabase/supabase-js';
 
 @Component({
   selector: 'app-header',
@@ -12,24 +16,21 @@ import { Router, RouterModule } from '@angular/router';
 export class HeaderComponent implements OnInit {
   greeting = '';
   currentDate = new Date();
-  userName = 'User';
+  currentUserName: Observable<string>;
   userEmail = '';
   showProfileMenu = false;
 
-  constructor(private router: Router) { }
+  constructor(
+    private router: Router,
+    private supabase: SupabaseService
+  ) {
+    this.currentUserName = this.supabase.currentUser.pipe(
+      map(user => user?.email?.split('@')[0] || 'User')
+    );
+  }
 
   ngOnInit() {
     this.setGreeting();
-    this.loadUserData();
-  }
-
-  private loadUserData() {
-    const stored = localStorage.getItem('currentUser');
-    if (stored) {
-      const user = JSON.parse(stored);
-      this.userName = user.name || 'User';
-      this.userEmail = user.email || '';
-    }
   }
 
   private setGreeting() {
@@ -52,8 +53,8 @@ export class HeaderComponent implements OnInit {
     this.showProfileMenu = false;
   }
 
-  logout() {
-    localStorage.removeItem('currentUser');
+  async logout() {
+    await this.supabase.signOut();
     this.router.navigate(['/auth']);
   }
 }
