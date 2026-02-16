@@ -113,13 +113,13 @@ export class AuthComponent implements OnInit {
     const userTransactionsKey = `transactions_${newUser.id}`;
     const userBudgetsKey = `budgets_${newUser.id}`;
     const userGoalsKey = `goals_${newUser.id}`;
-    
+
     localStorage.setItem(userTransactionsKey, JSON.stringify([]));
     localStorage.setItem(userBudgetsKey, JSON.stringify([]));
     localStorage.setItem(userGoalsKey, JSON.stringify([]));
 
     this.cleanupOldData();
-    
+
     localStorage.setItem('currentUser', JSON.stringify({
       id: newUser.id,
       name: newUser.name,

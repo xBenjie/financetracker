@@ -3,57 +3,57 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 
 @Component({
-    selector: 'app-header',
-    standalone: true,
-    imports: [CommonModule, RouterModule],
-    templateUrl: './header.component.html',
-    styleUrl: './header.component.scss'
+  selector: 'app-header',
+  standalone: true,
+  imports: [CommonModule, RouterModule],
+  templateUrl: './header.component.html',
+  styleUrl: './header.component.scss'
 })
 export class HeaderComponent implements OnInit {
-    greeting = '';
-    currentDate = new Date();
-    userName = 'User';
-    userEmail = '';
-    showProfileMenu = false;
+  greeting = '';
+  currentDate = new Date();
+  userName = 'User';
+  userEmail = '';
+  showProfileMenu = false;
 
-    constructor(private router: Router) {}
+  constructor(private router: Router) { }
 
-    ngOnInit() {
-        this.setGreeting();
-        this.loadUserData();
+  ngOnInit() {
+    this.setGreeting();
+    this.loadUserData();
+  }
+
+  private loadUserData() {
+    const stored = localStorage.getItem('currentUser');
+    if (stored) {
+      const user = JSON.parse(stored);
+      this.userName = user.name || 'User';
+      this.userEmail = user.email || '';
     }
+  }
 
-    private loadUserData() {
-        const stored = localStorage.getItem('currentUser');
-        if (stored) {
-            const user = JSON.parse(stored);
-            this.userName = user.name || 'User';
-            this.userEmail = user.email || '';
-        }
+  private setGreeting() {
+    const hour = new Date().getHours();
+
+    if (hour < 12) {
+      this.greeting = 'Good Morning';
+    } else if (hour < 18) {
+      this.greeting = 'Good Afternoon';
+    } else {
+      this.greeting = 'Good Evening';
     }
+  }
 
-    private setGreeting() {
-        const hour = new Date().getHours();
+  toggleProfileMenu() {
+    this.showProfileMenu = !this.showProfileMenu;
+  }
 
-        if (hour < 12) {
-            this.greeting = 'Good Morning';
-        } else if (hour < 18) {
-            this.greeting = 'Good Afternoon';
-        } else {
-            this.greeting = 'Good Evening';
-        }
-    }
+  closeProfileMenu() {
+    this.showProfileMenu = false;
+  }
 
-    toggleProfileMenu() {
-        this.showProfileMenu = !this.showProfileMenu;
-    }
-
-    closeProfileMenu() {
-        this.showProfileMenu = false;
-    }
-
-    logout() {
-        localStorage.removeItem('currentUser');
-        this.router.navigate(['/auth']);
-    }
+  logout() {
+    localStorage.removeItem('currentUser');
+    this.router.navigate(['/auth']);
+  }
 }

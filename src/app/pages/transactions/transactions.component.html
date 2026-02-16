@@ -1,146 +1,151 @@
 <section class="transactions">
-	<div class="page-header">
-		<div>
-			<h2>Transactions</h2>
-			<p>Manage your income and expenses</p>
-		</div>
-		<button class="btn-primary" (click)="openForm()">+ Add Transaction</button>
-	</div>
+  <div class="page-header">
+    <div>
+      <h2>Transactions</h2>
+      <p>Manage your income and expenses</p>
+    </div>
+    <button class="btn-primary" (click)="openForm()">+ Add Transaction</button>
+  </div>
 
-	<div class="summary-cards">
-		<div class="summary-card income">
-			<div class="summary-icon">💰</div>
-			<div class="summary-content">
-				<span class="summary-label">Total Income</span>
-				<h3>{{ totalIncome | currency: 'PHP':'symbol':'1.2-2' }}</h3>
-			</div>
-		</div>
-		<div class="summary-card expense">
-			<div class="summary-icon">💸</div>
-			<div class="summary-content">
-				<span class="summary-label">Total Expenses</span>
-				<h3>{{ totalExpenses | currency: 'PHP':'symbol':'1.2-2' }}</h3>
-			</div>
-		</div>
-		<div class="summary-card balance">
-			<div class="summary-icon">📊</div>
-			<div class="summary-content">
-				<span class="summary-label">Net Balance</span>
-				<h3 [class.positive]="netBalance >= 0" [class.negative]="netBalance < 0">
-					{{ netBalance | currency: 'PHP':'symbol':'1.2-2' }}
-				</h3>
-			</div>
-		</div>
-	</div>
+  <div class="summary-cards">
+    <div class="summary-card income">
+      <div class="summary-icon">💰</div>
+      <div class="summary-content">
+        <span class="summary-label">Total Income</span>
+        <h3>{{ totalIncome | currency: 'PHP':'symbol':'1.2-2' }}</h3>
+      </div>
+    </div>
+    <div class="summary-card expense">
+      <div class="summary-icon">💸</div>
+      <div class="summary-content">
+        <span class="summary-label">Total Expenses</span>
+        <h3>{{ totalExpenses | currency: 'PHP':'symbol':'1.2-2' }}</h3>
+      </div>
+    </div>
+    <div class="summary-card balance">
+      <div class="summary-icon">📊</div>
+      <div class="summary-content">
+        <span class="summary-label">Net Balance</span>
+        <h3 [class.positive]="netBalance >= 0" [class.negative]="netBalance < 0">
+          {{ netBalance | currency: 'PHP':'symbol':'1.2-2' }}
+        </h3>
+      </div>
+    </div>
+  </div>
 
-	<div class="filter-section">
-		<div class="filters">
-			<input type="text" class="search-input" placeholder="Search transactions..." [(ngModel)]="searchText" (ngModelChange)="applyFilters()">
-			<select class="filter-select" [(ngModel)]="filterType" (ngModelChange)="applyFilters()">
-				<option value="all">All Types</option>
-				<option value="income">Income Only</option>
-				<option value="expense">Expenses Only</option>
-			</select>
-		</div>
-		<span class="result-count">{{ filteredTransactions.length }} transactions</span>
-	</div>
+  <div class="filter-section">
+    <div class="filters">
+      <input type="text" class="search-input" placeholder="Search transactions..." [(ngModel)]="searchText"
+        (ngModelChange)="applyFilters()">
+      <select class="filter-select" [(ngModel)]="filterType" (ngModelChange)="applyFilters()">
+        <option value="all">All Types</option>
+        <option value="income">Income Only</option>
+        <option value="expense">Expenses Only</option>
+      </select>
+    </div>
+    <span class="result-count">{{ filteredTransactions.length }} transactions</span>
+  </div>
 
-	<div class="transactions-list">
-		<div class="transaction-card" *ngFor="let transaction of filteredTransactions" [class.income]="transaction.type === 'income'" [class.expense]="transaction.type === 'expense'">
-			<div class="transaction-main">
-				<div class="transaction-info">
-					<h4>{{ transaction.description }}</h4>
-					<div class="transaction-meta">
-						<span class="category">{{ transaction.category }}</span>
-						<span class="date">{{ transaction.date | date: 'MMM d, y' }}</span>
-					</div>
-				</div>
-				<div class="transaction-amount" [class.income]="transaction.type === 'income'" [class.expense]="transaction.type === 'expense'">
-					<span class="type-badge">{{ transaction.type }}</span>
-					<span class="amount">{{ transaction.amount | currency: 'PHP':'symbol':'1.2-2' }}</span>
-				</div>
-			</div>
-			<div class="transaction-actions">
-				<button class="btn-icon" (click)="openForm(transaction)" title="Edit">✏️</button>
-				<button class="btn-icon" (click)="openDeleteModal(transaction)" title="Delete">🗑️</button>
-			</div>
-		</div>
+  <div class="transactions-list">
+    <div class="transaction-card" *ngFor="let transaction of filteredTransactions"
+      [class.income]="transaction.type === 'income'" [class.expense]="transaction.type === 'expense'">
+      <div class="transaction-main">
+        <div class="transaction-info">
+          <h4>{{ transaction.description }}</h4>
+          <div class="transaction-meta">
+            <span class="category">{{ transaction.category }}</span>
+            <span class="date">{{ transaction.date | date: 'MMM d, y' }}</span>
+          </div>
+        </div>
+        <div class="transaction-amount" [class.income]="transaction.type === 'income'"
+          [class.expense]="transaction.type === 'expense'">
+          <span class="type-badge">{{ transaction.type }}</span>
+          <span class="amount">{{ transaction.amount | currency: 'PHP':'symbol':'1.2-2' }}</span>
+        </div>
+      </div>
+      <div class="transaction-actions">
+        <button class="btn-icon" (click)="openForm(transaction)" title="Edit">✏️</button>
+        <button class="btn-icon" (click)="openDeleteModal(transaction)" title="Delete">🗑️</button>
+      </div>
+    </div>
 
-		<div class="empty-state" *ngIf="filteredTransactions.length === 0">
-			<div class="empty-icon">📭</div>
-			<p>No transactions found</p>
-			<small>Add your first transaction to get started</small>
-		</div>
-	</div>
+    <div class="empty-state" *ngIf="filteredTransactions.length === 0">
+      <div class="empty-icon">📭</div>
+      <p>No transactions found</p>
+      <small>Add your first transaction to get started</small>
+    </div>
+  </div>
 
-	<!-- Transaction Form Modal -->
-	<div class="modal-overlay" *ngIf="showForm" (click)="closeForm()">
-		<div class="modal-content" (click)="$event.stopPropagation()">
-			<div class="modal-header">
-				<h3>{{ editingId ? 'Edit Transaction' : 'Add New Transaction' }}</h3>
-				<button class="btn-close" (click)="closeForm()">×</button>
-			</div>
-			<form class="transaction-form" (ngSubmit)="saveTransaction()">
-				<div class="form-group">
-					<label for="type">Type</label>
-					<select id="type" [(ngModel)]="type" name="type" (ngModelChange)="category = ''">
-						<option value="income">Income</option>
-						<option value="expense">Expense</option>
-					</select>
-				</div>
+  <!-- Transaction Form Modal -->
+  <div class="modal-overlay" *ngIf="showForm" (click)="closeForm()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>{{ editingId ? 'Edit Transaction' : 'Add New Transaction' }}</h3>
+        <button class="btn-close" (click)="closeForm()">×</button>
+      </div>
+      <form class="transaction-form" (ngSubmit)="saveTransaction()">
+        <div class="form-group">
+          <label for="type">Type</label>
+          <select id="type" [(ngModel)]="type" name="type" (ngModelChange)="category = ''">
+            <option value="income">Income</option>
+            <option value="expense">Expense</option>
+          </select>
+        </div>
 
-				<div class="form-group">
-					<label for="description">Description</label>
-					<input type="text" id="description" [(ngModel)]="description" name="description" placeholder="e.g., Monthly Salary" required>
-				</div>
+        <div class="form-group">
+          <label for="description">Description</label>
+          <input type="text" id="description" [(ngModel)]="description" name="description"
+            placeholder="e.g., Monthly Salary" required>
+        </div>
 
-				<div class="form-row">
-					<div class="form-group">
-						<label for="amount">Amount (₱)</label>
-						<input type="number" id="amount" [(ngModel)]="amount" name="amount" min="0" step="0.01" placeholder="0.00" required>
-					</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="amount">Amount (₱)</label>
+            <input type="number" id="amount" [(ngModel)]="amount" name="amount" min="0" step="0.01" placeholder="0.00"
+              required>
+          </div>
 
-					<div class="form-group">
-						<label for="date">Date</label>
-						<input type="date" id="date" [(ngModel)]="date" name="date" required>
-					</div>
-				</div>
+          <div class="form-group">
+            <label for="date">Date</label>
+            <input type="date" id="date" [(ngModel)]="date" name="date" required>
+          </div>
+        </div>
 
-				<div class="form-group">
-					<label for="category">Category</label>
-					<select id="category" [(ngModel)]="category" name="category" required>
-						<option value="">Select a category</option>
-						<option *ngFor="let cat of getCategoryOptions()" [value]="cat">{{ cat }}</option>
-					</select>
-				</div>
+        <div class="form-group">
+          <label for="category">Category</label>
+          <select id="category" [(ngModel)]="category" name="category" required>
+            <option value="">Select a category</option>
+            <option *ngFor="let cat of getCategoryOptions()" [value]="cat">{{ cat }}</option>
+          </select>
+        </div>
 
-				<div class="form-actions">
-					<button type="button" class="btn-secondary" (click)="closeForm()">Cancel</button>
-					<button type="submit" class="btn-primary">{{ editingId ? 'Update' : 'Add' }} Transaction</button>
-				</div>
-			</form>
-		</div>
-	</div>
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" (click)="closeForm()">Cancel</button>
+          <button type="submit" class="btn-primary">{{ editingId ? 'Update' : 'Add' }} Transaction</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-	<!-- Delete Confirmation Modal -->
-	<div class="modal-overlay" *ngIf="showDeleteModal" (click)="closeDeleteModal()">
-		<div class="modal-content small" (click)="$event.stopPropagation()">
-			<div class="modal-header">
-				<h3>Confirm Deletion</h3>
-				<button class="btn-close" (click)="closeDeleteModal()">×</button>
-			</div>
-			<div class="modal-body">
-				<p>Are you sure you want to delete this transaction?</p>
-				<div class="delete-preview" *ngIf="deletingTransaction">
-					<strong>{{ deletingTransaction.description }}</strong>
-					<span>{{ deletingTransaction.amount | currency: 'PHP':'symbol':'1.2-2' }}</span>
-				</div>
-				<p class="warning-text">This action cannot be undone.</p>
-			</div>
-			<div class="modal-actions">
-				<button type="button" class="btn-secondary" (click)="closeDeleteModal()">Cancel</button>
-				<button type="button" class="btn-danger" (click)="confirmDelete()">Delete</button>
-			</div>
-		</div>
-	</div>
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-overlay" *ngIf="showDeleteModal" (click)="closeDeleteModal()">
+    <div class="modal-content small" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Confirm Deletion</h3>
+        <button class="btn-close" (click)="closeDeleteModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete this transaction?</p>
+        <div class="delete-preview" *ngIf="deletingTransaction">
+          <strong>{{ deletingTransaction.description }}</strong>
+          <span>{{ deletingTransaction.amount | currency: 'PHP':'symbol':'1.2-2' }}</span>
+        </div>
+        <p class="warning-text">This action cannot be undone.</p>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" (click)="closeDeleteModal()">Cancel</button>
+        <button type="button" class="btn-danger" (click)="confirmDelete()">Delete</button>
+      </div>
+    </div>
+  </div>
 </section>

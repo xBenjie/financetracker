@@ -14,15 +14,15 @@ interface Goal {
 }
 
 @Component({
-    selector: 'app-goals',
-    standalone: true,
-    imports: [CommonModule, FormsModule],
-    templateUrl: './goals.component.html',
-    styleUrl: './goals.component.scss'
+  selector: 'app-goals',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  templateUrl: './goals.component.html',
+  styleUrl: './goals.component.scss'
 })
 export class GoalsComponent implements OnInit {
   goals: Goal[] = [];
-  
+
   // Form fields
   showForm = false;
   showContributeModal = false;
@@ -30,14 +30,14 @@ export class GoalsComponent implements OnInit {
   deletingGoal: Goal | null = null;
   editingId: number | null = null;
   contributingGoal: Goal | null = null;
-  
+
   title = '';
   targetAmount: number | null = null;
   currentAmount: number | null = null;
   deadline = '';
   category = '';
   contributeAmount: number | null = null;
-  
+
   categories = [
     'Emergency Fund',
     'Vacation',
@@ -50,7 +50,7 @@ export class GoalsComponent implements OnInit {
     'Business',
     'Other'
   ];
-  
+
   goalColors = [
     '#6366f1',
     '#22c55e',
@@ -61,19 +61,19 @@ export class GoalsComponent implements OnInit {
     '#60a5fa',
     '#84cc16'
   ];
-  
+
   ngOnInit(): void {
     this.loadGoals();
   }
-  
+
   loadGoals(): void {
     // Get current user
     const currentUserStr = localStorage.getItem('currentUser');
     if (!currentUserStr) return;
-    
+
     const currentUser = JSON.parse(currentUserStr);
     const userGoalsKey = `goals_${currentUser.id}`;
-    
+
     const stored = localStorage.getItem(userGoalsKey);
     if (stored) {
       this.goals = JSON.parse(stored).map((g: any) => ({
@@ -86,16 +86,16 @@ export class GoalsComponent implements OnInit {
       this.saveGoals();
     }
   }
-  
+
   saveGoals(): void {
     const currentUserStr = localStorage.getItem('currentUser');
     if (!currentUserStr) return;
-    
+
     const currentUser = JSON.parse(currentUserStr);
     const userGoalsKey = `goals_${currentUser.id}`;
     localStorage.setItem(userGoalsKey, JSON.stringify(this.goals));
   }
-  
+
   openForm(goal?: Goal): void {
     if (goal) {
       this.editingId = goal.id;
@@ -109,12 +109,12 @@ export class GoalsComponent implements OnInit {
     }
     this.showForm = true;
   }
-  
+
   closeForm(): void {
     this.showForm = false;
     this.resetForm();
   }
-  
+
   resetForm(): void {
     this.editingId = null;
     this.title = '';
@@ -123,12 +123,12 @@ export class GoalsComponent implements OnInit {
     this.deadline = '';
     this.category = '';
   }
-  
+
   saveGoal(): void {
     if (!this.title || !this.targetAmount || !this.deadline || !this.category) {
       return;
     }
-    
+
     if (this.editingId) {
       const index = this.goals.findIndex(g => g.id === this.editingId);
       if (index !== -1) {
@@ -154,21 +154,21 @@ export class GoalsComponent implements OnInit {
       };
       this.goals.push(newGoal);
     }
-    
+
     this.saveGoals();
     this.closeForm();
   }
-  
+
   openDeleteModal(goal: Goal): void {
     this.deletingGoal = goal;
     this.showDeleteModal = true;
   }
-  
+
   closeDeleteModal(): void {
     this.showDeleteModal = false;
     this.deletingGoal = null;
   }
-  
+
   confirmDelete(): void {
     if (this.deletingGoal) {
       this.goals = this.goals.filter(g => g.id !== this.deletingGoal!.id);
@@ -176,24 +176,24 @@ export class GoalsComponent implements OnInit {
       this.closeDeleteModal();
     }
   }
-  
+
   openContributeModal(goal: Goal): void {
     this.contributingGoal = goal;
     this.contributeAmount = null;
     this.showContributeModal = true;
   }
-  
+
   closeContributeModal(): void {
     this.showContributeModal = false;
     this.contributingGoal = null;
     this.contributeAmount = null;
   }
-  
+
   addContribution(): void {
     if (!this.contributingGoal || !this.contributeAmount || this.contributeAmount <= 0) {
       return;
     }
-    
+
     const goal = this.goals.find(g => g.id === this.contributingGoal!.id);
     if (goal) {
       goal.currentAmount += this.contributeAmount;
@@ -202,53 +202,53 @@ export class GoalsComponent implements OnInit {
       }
       this.saveGoals();
     }
-    
+
     this.closeContributeModal();
   }
-  
+
   getPercentage(goal: Goal): number {
     return Math.min((goal.currentAmount / goal.targetAmount) * 100, 100);
   }
-  
+
   getRemainingAmount(goal: Goal): number {
     return Math.max(goal.targetAmount - goal.currentAmount, 0);
   }
-  
+
   getDaysRemaining(goal: Goal): number {
     const today = new Date();
     const deadline = new Date(goal.deadline);
     const diff = deadline.getTime() - today.getTime();
     return Math.ceil(diff / (1000 * 60 * 60 * 24));
   }
-  
+
   getStatusClass(goal: Goal): string {
     if (goal.completed) return 'completed';
-    
+
     const daysRemaining = this.getDaysRemaining(goal);
     const percentage = this.getPercentage(goal);
-    
+
     if (daysRemaining < 0) return 'overdue';
     if (daysRemaining < 30 && percentage < 80) return 'urgent';
     if (percentage >= 80) return 'on-track';
     return 'in-progress';
   }
-  
+
   get activeGoals(): Goal[] {
     return this.goals.filter(g => !g.completed);
   }
-  
+
   get completedGoals(): Goal[] {
     return this.goals.filter(g => g.completed);
   }
-  
+
   get totalTargetAmount(): number {
     return this.activeGoals.reduce((sum, g) => sum + g.targetAmount, 0);
   }
-  
+
   get totalCurrentAmount(): number {
     return this.activeGoals.reduce((sum, g) => sum + g.currentAmount, 0);
   }
-  
+
   get totalRemaining(): number {
     return this.totalTargetAmount - this.totalCurrentAmount;
   }
