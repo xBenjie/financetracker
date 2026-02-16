@@ -5,6 +5,12 @@
 			<p>{{ isLoginMode ? 'Welcome back! Please login to continue.' : 'Create your account to get started.' }}</p>
 		</div>
 
+		<!-- Error Message -->
+		<div *ngIf="errorMessage" class="error-message">
+			<span class="error-icon">⚠️</span>
+			{{ errorMessage }}
+		</div>
+
 		<!-- Login Form -->
 		<form *ngIf="isLoginMode" class="auth-form" (ngSubmit)="onLogin()">
 			<div class="form-group">

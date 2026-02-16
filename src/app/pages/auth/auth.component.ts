@@ -12,6 +12,7 @@ import { Router } from '@angular/router';
 })
 export class AuthComponent implements OnInit {
   isLoginMode = true;
+  errorMessage = '';
   
   // Login fields
   loginEmail = '';
@@ -45,10 +46,14 @@ export class AuthComponent implements OnInit {
     this.signupEmail = '';
     this.signupPassword = '';
     this.signupConfirmPassword = '';
+    this.errorMessage = '';
   }
   
   onLogin(): void {
+    this.errorMessage = '';
+    
     if (!this.loginEmail || !this.loginPassword) {
+      this.errorMessage = 'Please fill in all fields';
       return;
     }
     
@@ -63,29 +68,32 @@ export class AuthComponent implements OnInit {
       }));
       this.router.navigate(['/dashboard']);
     } else {
-      alert('Invalid email or password');
+      this.errorMessage = 'Invalid email or password';
     }
   }
   
   onSignup(): void {
+    this.errorMessage = '';
+    
     if (!this.signupName || !this.signupEmail || !this.signupPassword || !this.signupConfirmPassword) {
+      this.errorMessage = 'Please fill in all fields';
       return;
     }
     
     if (this.signupPassword !== this.signupConfirmPassword) {
-      alert('Passwords do not match');
+      this.errorMessage = 'Passwords do not match';
       return;
     }
     
     if (this.signupPassword.length < 6) {
-      alert('Password must be at least 6 characters');
+      this.errorMessage = 'Password must be at least 6 characters';
       return;
     }
     
     const users = this.getUsers();
     
     if (users.find(u => u.email === this.signupEmail)) {
-      alert('Email already exists');
+      this.errorMessage = 'Email already exists';
       return;
     }
     

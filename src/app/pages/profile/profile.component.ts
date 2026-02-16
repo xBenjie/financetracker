@@ -20,6 +20,10 @@ export class ProfileComponent implements OnInit {
   newPassword = '';
   confirmPassword = '';
   
+  errorMessage = '';
+  successMessage = '';
+  passwordError = '';
+  
   showPasswordSection = false;
   showDeleteModal = false;
   
@@ -41,7 +45,11 @@ export class ProfileComponent implements OnInit {
   }
   
   saveProfile(): void {
+    this.errorMessage = '';
+    this.successMessage = '';
+    
     if (!this.name || !this.email) {
+      this.errorMessage = 'Please fill in all fields';
       return;
     }
     
@@ -59,21 +67,26 @@ export class ProfileComponent implements OnInit {
       localStorage.setItem('users', JSON.stringify(users));
     }
     
-    alert('Profile updated successfully!');
+    this.successMessage = 'Profile updated successfully!';
+    setTimeout(() => this.successMessage = '', 3000);
   }
   
   changePassword(): void {
+    this.passwordError = '';
+    this.successMessage = '';
+    
     if (!this.currentPassword || !this.newPassword || !this.confirmPassword) {
+      this.passwordError = 'Please fill in all password fields';
       return;
     }
     
     if (this.newPassword !== this.confirmPassword) {
-      alert('New passwords do not match');
+      this.passwordError = 'New passwords do not match';
       return;
     }
     
     if (this.newPassword.length < 6) {
-      alert('Password must be at least 6 characters');
+      this.passwordError = 'Password must be at least 6 characters';
       return;
     }
     
@@ -81,7 +94,7 @@ export class ProfileComponent implements OnInit {
     const user = users.find(u => u.id === this.currentUser.id);
     
     if (!user || user.password !== this.currentPassword) {
-      alert('Current password is incorrect');
+      this.passwordError = 'Current password is incorrect';
       return;
     }
     
@@ -93,7 +106,8 @@ export class ProfileComponent implements OnInit {
     this.confirmPassword = '';
     this.showPasswordSection = false;
     
-    alert('Password changed successfully!');
+    this.successMessage = 'Password changed successfully!';
+    setTimeout(() => this.successMessage = '', 3000);
   }
   
   openDeleteModal(): void {
