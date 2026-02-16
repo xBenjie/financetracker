@@ -1,0 +1,95 @@
+<section class="profile">
+	<div class="page-header">
+		<div>
+			<h2>Profile Settings</h2>
+			<p>Manage your account information</p>
+		</div>
+		<button class="btn-danger" (click)="logout()">Logout</button>
+	</div>
+
+	<div class="profile-grid">
+		<!-- Personal Information -->
+		<div class="profile-section">
+			<div class="section-header">
+				<h3>Personal Information</h3>
+				<span class="section-icon">👤</span>
+			</div>
+			<form class="profile-form" (ngSubmit)="saveProfile()">
+				<div class="form-group">
+					<label for="name">Full Name</label>
+					<input type="text" id="name" [(ngModel)]="name" name="name" placeholder="Your full name" required>
+				</div>
+
+				<div class="form-group">
+					<label for="email">Email Address</label>
+					<input type="email" id="email" [(ngModel)]="email" name="email" placeholder="your@email.com" required>
+				</div>
+
+				<button type="submit" class="btn-primary">Save Changes</button>
+			</form>
+		</div>
+
+		<!-- Password Section -->
+		<div class="profile-section">
+			<div class="section-header">
+				<h3>Password & Security</h3>
+				<span class="section-icon">🔒</span>
+			</div>
+
+			<button *ngIf="!showPasswordSection" type="button" class="btn-secondary" (click)="showPasswordSection = true">
+				Change Password
+			</button>
+
+			<form *ngIf="showPasswordSection" class="profile-form" (ngSubmit)="changePassword()">
+				<div class="form-group">
+					<label for="currentPassword">Current Password</label>
+					<input type="password" id="currentPassword" [(ngModel)]="currentPassword" name="currentPassword" placeholder="Enter current password" required>
+				</div>
+
+				<div class="form-group">
+					<label for="newPassword">New Password</label>
+					<input type="password" id="newPassword" [(ngModel)]="newPassword" name="newPassword" placeholder="At least 6 characters" required>
+				</div>
+
+				<div class="form-group">
+					<label for="confirmPassword">Confirm New Password</label>
+					<input type="password" id="confirmPassword" [(ngModel)]="confirmPassword" name="confirmPassword" placeholder="Re-enter new password" required>
+				</div>
+
+				<div class="button-group">
+					<button type="button" class="btn-secondary" (click)="showPasswordSection = false">Cancel</button>
+					<button type="submit" class="btn-primary">Update Password</button>
+				</div>
+			</form>
+		</div>
+
+		<!-- Danger Zone -->
+		<div class="profile-section danger-section">
+			<div class="section-header">
+				<h3>Danger Zone</h3>
+				<span class="section-icon">⚠️</span>
+			</div>
+			<p class="danger-text">Once you delete your account, there is no going back. All your data will be permanently deleted.</p>
+			<button type="button" class="btn-danger-outline" (click)="openDeleteModal()">Delete Account</button>
+		</div>
+	</div>
+
+	<!-- Delete Confirmation Modal -->
+	<div class="modal-overlay" *ngIf="showDeleteModal" (click)="closeDeleteModal()">
+		<div class="modal-content small" (click)="$event.stopPropagation()">
+			<div class="modal-header">
+				<h3>Delete Account</h3>
+				<button class="btn-close" (click)="closeDeleteModal()">×</button>
+			</div>
+			<div class="modal-body">
+				<p><strong>Are you absolutely sure?</strong></p>
+				<p>This action cannot be undone. This will permanently delete your account and remove all your data including transactions, budgets, and goals.</p>
+				<p class="warning-text">Please type "DELETE" to confirm.</p>
+			</div>
+			<div class="modal-actions">
+				<button type="button" class="btn-secondary" (click)="closeDeleteModal()">Cancel</button>
+				<button type="button" class="btn-danger" (click)="deleteAccount()">Delete Account</button>
+			</div>
+		</div>
+	</div>
+</section>

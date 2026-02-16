@@ -1,0 +1,102 @@
+<section class="dashboard">
+  <div class="dashboard-header">
+    <div>
+      <h2>Dashboard</h2>
+      <p>Live insights for today’s activity</p>
+    </div>
+    <span class="live-pill">Live</span>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-header">
+        <span>Total Income</span>
+        <span class="stat-icon">₱</span>
+      </div>
+      <h3>{{ totalIncome | currency: 'PHP':'symbol':'1.0-0' }}</h3>
+      <p>in current cycle</p>
+    </div>
+    <div class="stat-card">
+      <div class="stat-header">
+        <span>Total Expenses</span>
+        <span class="stat-icon">🧾</span>
+      </div>
+      <h3>{{ totalExpenses | currency: 'PHP':'symbol':'1.0-0' }}</h3>
+      <p>in current cycle</p>
+    </div>
+    <div class="stat-card">
+      <div class="stat-header">
+        <span>Net Balance</span>
+        <span class="stat-icon">💼</span>
+      </div>
+      <h3>{{ netBalance | currency: 'PHP':'symbol':'1.0-0' }}</h3>
+      <p>Your financial standing</p>
+    </div>
+    <div class="stat-card">
+      <div class="stat-header">
+        <span>Transactions</span>
+        <span class="stat-icon">⚡</span>
+      </div>
+      <h3>{{ transactionsCount }}</h3>
+      <p>transactions in cycle</p>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <div>
+        <h3>Daily Transactions</h3>
+        <p>Your income and expenses for the last 7 days.</p>
+      </div>
+    </div>
+    <div class="chart-container">
+      <canvas baseChart #dailyChart [type]="dailyChartType" [data]="dailyChartData" [options]="dailyChartOptions">
+      </canvas>
+    </div>
+  </div>
+
+  <div class="lower-grid">
+    <div class="panel">
+      <div class="panel-header">
+        <div>
+          <h3>Monthly Overview</h3>
+          <p>Income vs. expenses for the last 3 months.</p>
+        </div>
+      </div>
+      <div class="chart-container">
+        <canvas baseChart #monthlyChart [type]="monthlyChartType" [data]="monthlyChartData"
+          [options]="monthlyChartOptions">
+        </canvas>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <div>
+          <h3>Recent Transactions</h3>
+          <p>The last transactions you made.</p>
+        </div>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Description</th>
+              <th>Date</th>
+              <th class="amount">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let tx of recentTransactions">
+              <td>{{ tx.description }}</td>
+              <td>{{ tx.date | date: 'MMMM d, y, h:mm a' }}</td>
+              <td class="amount" [class.income]="tx.type === 'income'" [class.expense]="tx.type === 'expense'">
+                {{ tx.amount | currency: 'PHP':'symbol':'1.2-2' }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>

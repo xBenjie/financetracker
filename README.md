@@ -1,6 +1,19 @@
-# FinanceTracker
+# Finance Tracker
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.0.1.
+A modern, feature-rich finance tracking application built with Angular 21.
+
+## Features
+
+- 📊 Real-time dashboard with live updates
+- 💰 Transaction management (income & expenses)
+- 📈 Budget tracking and management
+- 🎯 Financial goals setting
+- 👤 User authentication and profile management
+- 📱 Responsive design
+
+## Live Demo
+
+Visit the live application: [Finance Tracker](https://YOUR_USERNAME.github.io/financeTracker/)
 
 ## Development server
 

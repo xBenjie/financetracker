@@ -1,0 +1,34 @@
+<header class="header">
+    <div class="greeting-section" style="text-align: center; flex: 1;">
+        <h1 class="greeting-text">{{ greeting }}, {{ userName }}!</h1>
+        <p class="date-text">{{ currentDate | date: 'EEEE, MMMM d, y' }}</p>
+    </div>
+    <div class="profile-section">
+        <button class="profile-button" (click)="toggleProfileMenu()">
+            <div class="avatar">{{ userName.charAt(0).toUpperCase() }}</div>
+            <span class="profile-name">{{ userName }}</span>
+            <span class="dropdown-icon">▼</span>
+        </button>
+        <div class="profile-menu" *ngIf="showProfileMenu" (click)="closeProfileMenu()">
+            <div class="profile-menu-content" (click)="$event.stopPropagation()">
+                <div class="profile-menu-header">
+                    <div class="avatar-large">{{ userName.charAt(0).toUpperCase() }}</div>
+                    <div>
+                        <p class="profile-menu-name">{{ userName }}</p>
+                        <p class="profile-menu-email">{{ userEmail }}</p>
+                    </div>
+                </div>
+                <div class="profile-menu-divider"></div>
+                <a routerLink="/profile" class="profile-menu-item" (click)="closeProfileMenu()">
+                    <span class="menu-icon">⚙️</span>
+                    Profile Settings
+                </a>
+                <div class="profile-menu-divider"></div>
+                <button class="profile-menu-item logout" (click)="logout()">
+                    <span class="menu-icon">🚪</span>
+                    Logout
+                </button>
+            </div>
+        </div>
+    </div>
+</header>

@@ -1,0 +1,235 @@
+<section class="goals">
+	<div class="page-header">
+		<div>
+			<h2>Financial Goals</h2>
+			<p>Set and track your savings goals</p>
+		</div>
+		<button class="btn-primary" (click)="openForm()">+ Add Goal</button>
+	</div>
+
+	<div class="summary-cards">
+		<div class="summary-card">
+			<div class="summary-icon">🎯</div>
+			<div class="summary-content">
+				<span class="summary-label">Total Target</span>
+				<h3>{{ totalTargetAmount | currency: 'PHP':'symbol':'1.0-0' }}</h3>
+			</div>
+		</div>
+		<div class="summary-card">
+			<div class="summary-icon">💰</div>
+			<div class="summary-content">
+				<span class="summary-label">Total Saved</span>
+				<h3>{{ totalCurrentAmount | currency: 'PHP':'symbol':'1.0-0' }}</h3>
+			</div>
+		</div>
+		<div class="summary-card">
+			<div class="summary-icon">📈</div>
+			<div class="summary-content">
+				<span class="summary-label">Remaining</span>
+				<h3>{{ totalRemaining | currency: 'PHP':'symbol':'1.0-0' }}</h3>
+			</div>
+		</div>
+	</div>
+
+	<div class="goals-section" *ngIf="activeGoals.length > 0">
+		<h3 class="section-title">Active Goals</h3>
+		<div class="goals-grid">
+			<div class="goal-card" *ngFor="let goal of activeGoals" [class]="getStatusClass(goal)">
+				<div class="goal-header">
+					<div class="goal-title">
+						<div class="goal-color" [style.background-color]="goal.color"></div>
+						<div>
+							<h4>{{ goal.title }}</h4>
+							<span class="goal-category">{{ goal.category }}</span>
+						</div>
+					</div>
+					<div class="goal-actions">
+						<button class="btn-icon" (click)="openForm(goal)" title="Edit">✏️</button>
+						<button class="btn-icon" (click)="openDeleteModal(goal)" title="Delete">🗑️</button>
+					</div>
+				</div>
+
+				<div class="goal-amounts">
+					<div class="amount-row">
+						<span class="label">Current</span>
+						<span class="value current">{{ goal.currentAmount | currency: 'PHP':'symbol':'1.0-0' }}</span>
+					</div>
+					<div class="amount-row">
+						<span class="label">Target</span>
+						<span class="value">{{ goal.targetAmount | currency: 'PHP':'symbol':'1.0-0' }}</span>
+					</div>
+				</div>
+
+				<div class="progress-section">
+					<div class="progress-header">
+						<span class="progress-percentage">{{ getPercentage(goal) | number: '1.0-0' }}%</span>
+						<span class="progress-remaining">{{ getRemainingAmount(goal) | currency: 'PHP':'symbol':'1.0-0' }} to go</span>
+					</div>
+					<div class="progress-bar">
+						<div class="progress-fill" [style.width.%]="getPercentage(goal)" [style.background-color]="goal.color"></div>
+					</div>
+				</div>
+
+				<div class="goal-footer">
+					<div class="deadline-info">
+						<span class="deadline-icon">📅</span>
+						<span class="deadline-text">{{ goal.deadline | date: 'MMM d, y' }}</span>
+						<span class="days-remaining" [class.urgent]="getDaysRemaining(goal) < 30">
+							({{ getDaysRemaining(goal) }} days)
+						</span>
+					</div>
+					<button class="btn-contribute" (click)="openContributeModal(goal)">Add Funds</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="goals-section" *ngIf="completedGoals.length > 0">
+		<h3 class="section-title">Completed Goals 🎉</h3>
+		<div class="goals-grid">
+			<div class="goal-card completed" *ngFor="let goal of completedGoals">
+				<div class="goal-header">
+					<div class="goal-title">
+						<div class="goal-color" [style.background-color]="goal.color"></div>
+						<div>
+							<h4>{{ goal.title }}</h4>
+							<span class="goal-category">{{ goal.category }}</span>
+						</div>
+					</div>
+					<div class="completed-badge">✓ Completed</div>
+				</div>
+
+				<div class="goal-amounts">
+					<div class="amount-row">
+						<span class="label">Achieved</span>
+						<span class="value achieved">{{ goal.currentAmount | currency: 'PHP':'symbol':'1.0-0' }}</span>
+					</div>
+					<div class="amount-row">
+						<span class="label">Target</span>
+						<span class="value">{{ goal.targetAmount | currency: 'PHP':'symbol':'1.0-0' }}</span>
+					</div>
+				</div>
+
+				<div class="progress-section">
+					<div class="progress-bar">
+						<div class="progress-fill completed" style="width: 100%" [style.background-color]="goal.color"></div>
+					</div>
+				</div>
+
+				<div class="goal-footer">
+					<div class="deadline-info">
+						<span class="deadline-icon">📅</span>
+						<span class="deadline-text">Completed on {{ goal.deadline | date: 'MMM d, y' }}</span>
+					</div>
+					<button class="btn-delete-small" (click)="openDeleteModal(goal)">Remove</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="empty-state" *ngIf="goals.length === 0">
+		<div class="empty-icon">🎯</div>
+		<p>No goals set yet</p>
+		<small>Create your first financial goal to start saving</small>
+	</div>
+
+	<!-- Goal Form Modal -->
+	<div class="modal-overlay" *ngIf="showForm" (click)="closeForm()">
+		<div class="modal-content" (click)="$event.stopPropagation()">
+			<div class="modal-header">
+				<h3>{{ editingId ? 'Edit Goal' : 'Create New Goal' }}</h3>
+				<button class="btn-close" (click)="closeForm()">×</button>
+			</div>
+			<form class="goal-form" (ngSubmit)="saveGoal()">
+				<div class="form-group">
+					<label for="title">Goal Title</label>
+					<input type="text" id="title" [(ngModel)]="title" name="title" placeholder="e.g., Emergency Fund" required>
+				</div>
+
+				<div class="form-group">
+					<label for="category">Category</label>
+					<select id="category" [(ngModel)]="category" name="category" required>
+						<option value="">Select a category</option>
+						<option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+					</select>
+				</div>
+
+				<div class="form-row">
+					<div class="form-group">
+						<label for="targetAmount">Target Amount (₱)</label>
+						<input type="number" id="targetAmount" [(ngModel)]="targetAmount" name="targetAmount" min="0" step="0.01" placeholder="0.00" required>
+					</div>
+
+					<div class="form-group">
+						<label for="currentAmount">Current Amount (₱)</label>
+						<input type="number" id="currentAmount" [(ngModel)]="currentAmount" name="currentAmount" min="0" step="0.01" placeholder="0.00">
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label for="deadline">Target Date</label>
+					<input type="date" id="deadline" [(ngModel)]="deadline" name="deadline" required>
+				</div>
+
+				<div class="form-actions">
+					<button type="button" class="btn-secondary" (click)="closeForm()">Cancel</button>
+					<button type="submit" class="btn-primary">{{ editingId ? 'Update' : 'Create' }} Goal</button>
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<!-- Contribute Modal -->
+	<div class="modal-overlay" *ngIf="showContributeModal" (click)="closeContributeModal()">
+		<div class="modal-content small" (click)="$event.stopPropagation()">
+			<div class="modal-header">
+				<h3>Add Funds to {{ contributingGoal?.title }}</h3>
+				<button class="btn-close" (click)="closeContributeModal()">×</button>
+			</div>
+			<form class="contribute-form" (ngSubmit)="addContribution()">
+				<div class="contribute-info" *ngIf="contributingGoal">
+					<div class="info-row">
+						<span>Current Amount:</span>
+						<strong>{{ contributingGoal.currentAmount | currency: 'PHP':'symbol':'1.0-0' }}</strong>
+					</div>
+					<div class="info-row">
+						<span>Remaining:</span>
+						<strong>{{ getRemainingAmount(contributingGoal) | currency: 'PHP':'symbol':'1.0-0' }}</strong>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label for="contributeAmount">Amount to Add (₱)</label>
+					<input type="number" id="contributeAmount" [(ngModel)]="contributeAmount" name="contributeAmount" min="0.01" step="0.01" placeholder="0.00" required autofocus>
+				</div>
+
+				<div class="form-actions">
+					<button type="button" class="btn-secondary" (click)="closeContributeModal()">Cancel</button>
+					<button type="submit" class="btn-primary">Add Contribution</button>
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<!-- Delete Confirmation Modal -->
+	<div class="modal-overlay" *ngIf="showDeleteModal" (click)="closeDeleteModal()">
+		<div class="modal-content small" (click)="$event.stopPropagation()">
+			<div class="modal-header">
+				<h3>Confirm Deletion</h3>
+				<button class="btn-close" (click)="closeDeleteModal()">×</button>
+			</div>
+			<div class="modal-body">
+				<p>Are you sure you want to delete this goal?</p>
+				<div class="delete-preview" *ngIf="deletingGoal">
+					<strong>{{ deletingGoal.title }}</strong>
+					<span>{{ deletingGoal.targetAmount | currency: 'PHP':'symbol':'1.0-0' }}</span>
+				</div>
+				<p class="warning-text">This action cannot be undone.</p>
+			</div>
+			<div class="modal-actions">
+				<button type="button" class="btn-secondary" (click)="closeDeleteModal()">Cancel</button>
+				<button type="button" class="btn-danger" (click)="confirmDelete()">Delete</button>
+			</div>
+		</div>
+	</div>
+</section>

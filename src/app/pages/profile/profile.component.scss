@@ -1,0 +1,271 @@
+// Color Palette
+$primary: #6366f1;
+$success: #22c55e;
+$warning: #f59e0b;
+$danger: #f87171;
+$info: #60a5fa;
+
+.profile {
+	padding: 24px 28px 32px;
+	display: flex;
+	flex-direction: column;
+	gap: 24px;
+	color: #0f172a;
+}
+
+.page-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+
+	h2 {
+		font-size: 24px;
+		margin-bottom: 4px;
+	}
+
+	p {
+		color: #64748b;
+		font-size: 13px;
+	}
+}
+
+.profile-grid {
+	display: grid;
+	gap: 20px;
+	max-width: 800px;
+}
+
+.profile-section {
+	background: #ffffff;
+	border-radius: 12px;
+	padding: 24px;
+	box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+	border: 1px solid rgba(148, 163, 184, 0.2);
+
+	&.danger-section {
+		border-left: 4px solid $danger;
+	}
+}
+
+.section-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 20px;
+
+	h3 {
+		font-size: 18px;
+		font-weight: 600;
+	}
+
+	.section-icon {
+		font-size: 24px;
+	}
+}
+
+.profile-form {
+	display: flex;
+	flex-direction: column;
+	gap: 18px;
+}
+
+.form-group {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+
+	label {
+		font-size: 13px;
+		font-weight: 600;
+		color: #334155;
+	}
+
+	input {
+		padding: 10px 12px;
+		border: 1px solid #e2e8f0;
+		border-radius: 8px;
+		font-size: 14px;
+
+		&:focus {
+			outline: none;
+			border-color: $primary;
+			box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+		}
+	}
+}
+
+.button-group {
+	display: flex;
+	gap: 12px;
+	justify-content: flex-end;
+}
+
+.danger-text {
+	font-size: 14px;
+	color: #64748b;
+	line-height: 1.6;
+	margin-bottom: 16px;
+}
+
+.btn-primary {
+	padding: 10px 20px;
+	background: $primary;
+	color: white;
+	border: none;
+	border-radius: 8px;
+	font-size: 14px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.2s ease;
+
+	&:hover {
+		background: darken($primary, 8%);
+		transform: translateY(-1px);
+		box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+	}
+}
+
+.btn-secondary {
+	padding: 10px 20px;
+	background: #f1f5f9;
+	color: #475569;
+	border: none;
+	border-radius: 8px;
+	font-size: 14px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.2s ease;
+
+	&:hover {
+		background: #e2e8f0;
+	}
+}
+
+.btn-danger {
+	padding: 10px 20px;
+	background: $danger;
+	color: white;
+	border: none;
+	border-radius: 8px;
+	font-size: 14px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.2s ease;
+
+	&:hover {
+		background: darken($danger, 8%);
+		transform: translateY(-1px);
+		box-shadow: 0 4px 12px rgba(248, 113, 113, 0.3);
+	}
+}
+
+.btn-danger-outline {
+	padding: 10px 20px;
+	background: transparent;
+	color: $danger;
+	border: 2px solid $danger;
+	border-radius: 8px;
+	font-size: 14px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.2s ease;
+
+	&:hover {
+		background: rgba(248, 113, 113, 0.1);
+	}
+}
+
+// Modal styles
+.modal-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: rgba(0, 0, 0, 0.5);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	z-index: 1000;
+	backdrop-filter: blur(4px);
+}
+
+.modal-content {
+	background: white;
+	border-radius: 16px;
+	width: 90%;
+	max-width: 500px;
+	max-height: 90vh;
+	overflow-y: auto;
+	box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+
+	&.small {
+		max-width: 400px;
+	}
+}
+
+.modal-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 20px 24px;
+	border-bottom: 1px solid #e2e8f0;
+
+	h3 {
+		font-size: 18px;
+		font-weight: 600;
+		color: $danger;
+	}
+}
+
+.btn-close {
+	background: none;
+	border: none;
+	font-size: 28px;
+	color: #94a3b8;
+	cursor: pointer;
+	line-height: 1;
+	padding: 0;
+	width: 32px;
+	height: 32px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 6px;
+
+	&:hover {
+		background: #f1f5f9;
+		color: #475569;
+	}
+}
+
+.modal-body {
+	padding: 24px;
+
+	p {
+		font-size: 14px;
+		color: #475569;
+		margin-bottom: 12px;
+		line-height: 1.6;
+
+		strong {
+			color: #0f172a;
+		}
+	}
+
+	.warning-text {
+		font-size: 13px;
+		color: $danger;
+		font-weight: 600;
+		margin-top: 16px;
+		margin-bottom: 0;
+	}
+}
+
+.modal-actions {
+	display: flex;
+	gap: 12px;
+	justify-content: flex-end;
+	padding: 16px 24px;
+	border-top: 1px solid #e2e8f0;
+}

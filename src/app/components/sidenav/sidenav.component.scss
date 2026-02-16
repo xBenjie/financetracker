@@ -1,0 +1,132 @@
+.sidenav {
+  width: 250px;
+  height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  position: fixed;
+  left: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  transition: width 0.3s ease;
+
+  &.collapsed {
+    width: 70px;
+
+    .sidenav-header {
+      padding: 1rem 0.75rem;
+      justify-content: center;
+    }
+
+    .nav-link {
+      justify-content: center;
+      padding: 1rem 0.75rem;
+    }
+  }
+}
+
+.sidenav-header {
+  padding: 2rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 80px;
+
+  h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+}
+
+.toggle-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s ease;
+  min-width: 32px;
+  height: 32px;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.nav-list {
+  list-style: none;
+  padding: 1rem 0;
+  margin: 0;
+  flex: 1;
+}
+
+.nav-item {
+  margin: 0.25rem 0;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  transition: all 0.3s ease;
+  position: relative;
+  white-space: nowrap;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+  }
+
+  &.active {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    font-weight: 600;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: white;
+    }
+  }
+}
+
+.nav-icon {
+  margin-right: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.nav-label {
+  font-size: 0.95rem;
+  font-weight: 400;
+  letter-spacing: 0.3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

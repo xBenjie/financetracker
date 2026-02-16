@@ -1,0 +1,20 @@
+<nav class="sidenav" [class.collapsed]="collapsed">
+  <div class="sidenav-header">
+    <h2 *ngIf="!collapsed">Finance Tracker</h2>
+    <button class="toggle-btn" (click)="toggleSidebar()" [attr.aria-label]="collapsed ? 'Expand sidebar' : 'Collapse sidebar'">
+      <mat-icon>{{ collapsed ? 'chevron_right' : 'chevron_left' }}</mat-icon>
+    </button>
+  </div>
+  <ul class="nav-list">
+    <li *ngFor="let item of navItems" class="nav-item">
+      <a 
+        [routerLink]="item.route" 
+        routerLinkActive="active"
+        class="nav-link"
+        [title]="item.label">
+        <mat-icon class="nav-icon">{{ item.icon }}</mat-icon>
+        <span class="nav-label" *ngIf="!collapsed">{{ item.label }}</span>
+      </a>
+    </li>
+  </ul>
+</nav>
