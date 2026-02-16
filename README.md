@@ -13,7 +13,7 @@ A modern, feature-rich finance tracking application built with Angular 21.
 
 ## Live Demo
 
-Visit the live application: [Finance Tracker](https://YOUR_USERNAME.github.io/financeTracker/)
+Visit the live application: [Finance Tracker](https://xBenjie.github.io/financetracker/)
 
 ## Development server
 
